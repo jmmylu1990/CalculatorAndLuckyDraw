@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>電商抽獎轉盤</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .nav-header {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
+        .nav-link {
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .nav-link:hover {
+            color: #818cf8;
+        }
+        
+        /* Wheel CSS container */
+        .wheel-container {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            margin: 0 auto;
+        }
+        
+        #wheelCanvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.5), 0 0 2px rgba(255, 255, 255, 0.2);
+            transition: transform 4s cubic-bezier(0.1, 0.8, 0.25, 1);
+        }
+        
+        /* Pointer */
+        .pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid #f43f5e;
+            z-index: 10;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4));
+        }
+        
+        .pointer-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background: #f8fafc;
+            border: 4px solid #4f46e5;
+            border-radius: 50%;
+            z-index: 11;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        
+        /* Prize Stock list styling */
+        .prize-stock-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        
+        .prize-stock-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+        
+        .prize-tag {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        .badge-stock {
+            background: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .badge-out {
+            background: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        /* Multiple draw choices */
+        .draw-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-top: 10px;
+        }
+        
+        .draw-select-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 6px 14px;
+        }
+        
+        .draw-select-label {
+            font-size: 0.95rem;
+            color: #94a3b8;
+        }
+        
+        .draw-select {
+            background: transparent;
+            border: none;
+            color: #f8fafc;
+            font-family: inherit;
+            font-size: 1.1rem;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            padding: 8px;
+        }
+        
+        .draw-select option {
+            background: #0f172a;
+            color: #f8fafc;
+        }
+        
+        /* Result Popups */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(2, 6, 23, 0.7);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        .modal-card {
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            width: 90%;
+            max-width: 420px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .modal-overlay.show {
+            display: flex;
+        }
+        
+        .modal-overlay.show .modal-card {
+            transform: scale(1);
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-bottom: 16px;
+        }
+        
+        .modal-results-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 20px 0;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 0 4px;
+        }
+        
+        .modal-result-item {
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border-left: 4px solid #10b981;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+        
+        .modal-result-item.lose {
+            border-left-color: #64748b;
+            opacity: 0.8;
+        }
+        
+        .btn-modal-close {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            border: none;
+            outline: none;
+            padding: 12px 28px;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+            transition: all 0.2s;
+        }
+        
+        .btn-modal-close:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-header">
+        <a th:href="@{/}" class="nav-link">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+            </svg>
+            切換至計算機
+        </a>
+    </div>
+
+    <div class="app-container">
+        <!-- Wheel Card -->
+        <div class="calculator-card" style="align-items: center; justify-content: center; gap: 24px;">
+            <!-- Alert Toast -->
+            <div id="alert-toast" class="alert-toast">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span id="alert-message">錯誤訊息</span>
+            </div>
+
+            <!-- Spinning Wheel -->
+            <div class="wheel-container">
+                <div class="pointer"></div>
+                <div class="pointer-center"></div>
+                <canvas id="wheelCanvas" width="300" height="300"></canvas>
+            </div>
+
+            <!-- Draw Controls -->
+            <div class="draw-actions" style="width: 100%;">
+                <div class="draw-select-container">
+                    <span class="draw-select-label">選擇抽獎次數</span>
+                    <select id="drawCountSelect" class="draw-select">
+                        <option value="1">單次抽獎</option>
+                        <option value="5">連續抽獎 5 次</option>
+                        <option value="10">連續抽獎 10 次</option>
+                    </select>
+                </div>
+                <button id="btn-draw" class="btn btn-op" style="width: 100%; border-radius: 16px; height: 56px;">開始抽獎</button>
+            </div>
+        </div>
+
+        <!-- Stock & History Card -->
+        <div class="history-card" style="justify-content: space-between;">
+            <div>
+                <div class="history-header">
+                    <h3>獎品剩餘數量</h3>
+                    <button id="btn-reset" class="btn-action" style="font-size: 0.85rem; padding: 4px 8px; border-radius: 6px; cursor: pointer; border: none; background: rgba(255,255,255,0.05); color: #cbd5e1;">重設數量</button>
+                </div>
+                <ul id="prize-stock-list" class="prize-stock-list">
+                    <li class="prize-stock-item" th:each="prize : ${prizes}" th:id="'stock-' + ${prize.id}">
+                        <span>
+                            <span class="prize-tag" th:style="'background: ' + (${prize.id} == 'prize_a' ? '#f43f5e' : (${prize.id} == 'prize_b' ? '#3b82f6' : '#10b981'))"></span>
+                            <span class="prize-name" th:text="${prize.name}"></span>
+                        </span>
+                        <span class="badge-stock" th:if="${prize.remainingQuantity > 0}" th:text="'剩餘 ' + ${prize.remainingQuantity} + ' 份'"></span>
+                        <span class="badge-out" th:if="${prize.remainingQuantity <= 0}">已抽完</span>
+                    </li>
+                    <li class="prize-stock-item">
+                        <span>
+                            <span class="prize-tag" style="background: #475569;"></span>
+                            <span>銘謝惠顧</span>
+                        </span>
+                        <span class="badge-stock" style="background: rgba(71, 85, 105, 0.15); color: #94a3b8;">機率 80%</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <div class="history-header">
+                    <h3>中獎紀錄</h3>
+                </div>
+                <ul id="lottery-history-list" class="history-list" style="max-height: 180px; margin-top: 10px;">
+                    <!-- Filled dynamically -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Modal -->
+    <div id="resultsModal" class="modal-overlay">
+        <div class="modal-card">
+            <div id="modal-title" class="modal-title">抽獎結果</div>
+            <ul id="modal-results-list" class="modal-results-list">
+                <!-- Filled dynamically -->
+            </ul>
+            <button id="btn-modal-close" class="btn-modal-close">確認</button>
+        </div>
+    </div>
+
+    <script>
+        // Sector settings (must align with Canvas segments)
+        // 0 to 90deg: iPhone 15 Pro
+        // 90 to 180deg: iPad Air
+        // 180 to 270deg: AirPods Pro
+        // 270 to 360deg: 銘謝惠顧
+        const sectors = [
+            { label: "iPhone 15 Pro", color: "#f43f5e", id: "prize_a" },
+            { label: "iPad Air", color: "#3b82f6", id: "prize_b" },
+            { label: "AirPods Pro", color: "#10b981", id: "prize_c" },
+            { label: "銘謝惠顧", color: "#475569", id: "none" }
+        ];
+
+        const canvas = document.getElementById("wheelCanvas");
+        const ctx = canvas.getContext("2d");
+        const numSectors = sectors.length;
+        const arc = 2 * Math.PI / numSectors;
+        
+        let currentRotation = 0;
+        let isDrawing = false;
+
+        function drawWheel() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = canvas.width / 2 - 10;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            for (let i = 0; i < numSectors; i++) {
+                const angle = i * arc;
+                ctx.beginPath();
+                ctx.fillStyle = sectors[i].color;
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, angle, angle + arc);
+                ctx.lineTo(centerX, centerY);
+                ctx.fill();
+                
+                // Draw text labels
+                ctx.save();
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "bold 13px Outfit, sans-serif";
+                ctx.translate(centerX, centerY);
+                ctx.rotate(angle + arc / 2);
+                ctx.textAlign = "right";
+                ctx.fillText(sectors[i].label, radius - 20, 5);
+                ctx.restore();
+            }
+        }
+        
+        drawWheel();
+
+        function showToast(msg) {
+            const toast = document.getElementById("alert-toast");
+            document.getElementById("alert-message").innerText = msg;
+            toast.classList.add("show");
+            setTimeout(() => {
+                toast.classList.remove("show");
+            }, 3000);
+        }
+
+        function updateStockUI(prizes) {
+            prizes.forEach(p => {
+                const li = document.getElementById("stock-" + p.id);
+                if (li) {
+                    const badge = li.querySelector(".badge-stock, .badge-out");
+                    if (p.remainingQuantity > 0) {
+                        badge.className = "badge-stock";
+                        badge.innerText = "剩餘 " + p.remainingQuantity + " 份";
+                    } else {
+                        badge.className = "badge-out";
+                        badge.innerText = "已抽完";
+                    }
+                }
+            });
+        }
+
+        // Execute drawing
+        document.getElementById("btn-draw").addEventListener("click", async () => {
+            if (isDrawing) return;
+            
+            const count = parseInt(document.getElementById("drawCountSelect").value);
+            const btn = document.getElementById("btn-draw");
+            
+            isDrawing = true;
+            btn.disabled = true;
+            btn.innerText = "抽獎中...";
+            
+            try {
+                const response = await fetch('/api/lottery/draw', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `count=${count}`
+                });
+                
+                const res = await response.json();
+                if (res.status === "error") {
+                    showToast(res.message);
+                    isDrawing = false;
+                    btn.disabled = false;
+                    btn.innerText = "開始抽獎";
+                    return;
+                }
+                
+                // Update stock numbers immediately in backend data, but wait to update UI until spin completes
+                const firstResult = res.results[0];
+                
+                // Find target segment index
+                let targetIndex = sectors.findIndex(s => s.id === firstResult.prizeId);
+                if (targetIndex === -1) {
+                    targetIndex = 3; // default "Thank You"
+                }
+                
+                // Spin animation logic
+                // Each segment spans 90deg (arc = Math.PI / 2).
+                // Top pointer points to 270deg (1.5 * Math.PI).
+                // To align the target segment with the top pointer:
+                // segmentCenterAngle + wheelRotationAngle = 270 degrees
+                // wheelRotationAngle = 270 - segmentCenterAngle
+                const segmentCenterRad = (targetIndex * arc) + (arc / 2);
+                const targetRotationRad = (1.5 * Math.PI) - segmentCenterRad;
+                
+                // Add 5 to 7 random full spins to build momentum
+                const extraSpins = (5 + Math.floor(Math.random() * 3)) * 2 * Math.PI;
+                currentRotation += extraSpins + (targetRotationRad - (currentRotation % (2 * Math.PI)));
+                
+                canvas.style.transform = `rotate(${currentRotation}rad)`;
+                
+                // Wait for CSS transition (4s) to finish
+                setTimeout(() => {
+                    // Update Stock UI
+                    updateStockUI(res.remainingPrizes);
+                    
+                    // Show results modal
+                    showResultsModal(res.results);
+                    
+                    // Add results to local history log
+                    addResultsToHistory(res.results);
+                    
+                    isDrawing = false;
+                    btn.disabled = false;
+                    btn.innerText = "開始抽獎";
+                }, 4100);
+                
+            } catch (err) {
+                showToast("抽獎連線失敗");
+                isDrawing = false;
+                btn.disabled = false;
+                btn.innerText = "開始抽獎";
+            }
+        });
+
+        function showResultsModal(results) {
+            const list = document.getElementById("modal-results-list");
+            list.innerHTML = "";
+            
+            const title = document.getElementById("modal-title");
+            if (results.length === 1) {
+                title.innerText = "抽獎結果";
+            } else {
+                title.innerText = `連續抽獎 ${results.length} 次結果`;
+            }
+            
+            results.forEach((item, index) => {
+                const li = document.createElement("li");
+                li.className = "modal-result-item" + (item.won ? "" : " lose");
+                li.innerText = (results.length > 1 ? `第 ${index + 1} 次：` : "") + (item.won ? `恭喜獲得 ${item.prizeName} !` : "銘謝惠顧，下次會更好！");
+                list.appendChild(li);
+            });
+            
+            document.getElementById("resultsModal").classList.add("show");
+        }
+
+        function addResultsToHistory(results) {
+            const list = document.getElementById("lottery-history-list");
+            results.forEach(item => {
+                const li = document.createElement("li");
+                li.className = "history-item";
+                li.style.borderLeftColor = item.won ? "#10b981" : "#64748b";
+                li.innerText = item.won ? `獲得 ${item.prizeName}` : "銘謝惠顧";
+                list.insertBefore(li, list.firstChild); // prepend new results
+            });
+        }
+
+        document.getElementById("btn-modal-close").addEventListener("click", () => {
+            document.getElementById("resultsModal").classList.remove("show");
+        });
+
+        document.getElementById("btn-reset").addEventListener("click", async () => {
+            if (isDrawing) return;
+            try {
+                const res = await fetch('/api/lottery/reset', { method: 'POST' }).then(r => r.json());
+                updateStockUI(res.remainingPrizes);
+                showToast("獎品數量重設成功");
+            } catch (err) {
+                showToast("重設失敗");
+            }
+        });
+    </script>
+</body>
+</html>
