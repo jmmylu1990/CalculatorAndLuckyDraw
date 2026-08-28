@@ -575,24 +575,23 @@
                 // Display report
                 const report = document.getElementById("concurrency-report");
                 report.style.display = "flex";
-                report.innerHTML = `
-                    <div class="report-title">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px;">
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                        </svg>
-                        高併發安全審計：SAFE
-                    </div>
-                    <div class="report-item"><span>並行請求總數:</span><span>\${res.totalRequests} 人</span></div>
-                    <div class="report-item"><span>核心處理耗時:</span><span>\${res.durationMs} ms</span></div>
-                    <div class="report-item"><span>成功中獎人數:</span><span>\${res.successCount} 人</span></div>
-                    <div class="report-item"><span>大獎得主分佈:</span><span></span></div>
-                    <div class="report-item" style="padding-left: 12px; color: #a5b4fc;"><span>- iPhone 15 Pro:</span><span>\${res.iphoneWon} 份</span></div>
-                    <div class="report-item" style="padding-left: 12px; color: #a5b4fc;"><span>- iPad Air:</span><span>\${res.ipadWon} 份</span></div>
-                    <div class="report-item" style="padding-left: 12px; color: #a5b4fc;"><span>- AirPods Pro:</span><span>\${res.airpodsWon} 份</span></div>
-                    <div class="report-item"><span>銘謝惠顧人數:</span><span>\${res.noneCount} 人</span></div>
-                    <div class="report-item" style="color: #34d399; font-weight: bold;"><span>超抽發生次數:</span><span>0 次 (安全)</span></div>
-                `;
+                report.innerHTML = 
+                    '<div class="report-title">' +
+                        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px;">' +
+                            '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>' +
+                            '<polyline points="22 4 12 14.01 9 11.01"></polyline>' +
+                        '</svg>' +
+                        '高併發安全審計：SAFE' +
+                    '</div>' +
+                    '<div class="report-item"><span>並行請求總數:</span><span>' + res.totalRequests + ' 人</span></div>' +
+                    '<div class="report-item"><span>核心處理耗時:</span><span>' + res.durationMs + ' ms</span></div>' +
+                    '<div class="report-item"><span>成功中獎人數:</span><span>' + res.successCount + ' 人</span></div>' +
+                    '<div class="report-item"><span>大獎得主分佈:</span><span></span></div>' +
+                    '<div class="report-item" style="padding-left: 12px; color: #a5b4fc;"><span>- iPhone 15 Pro:</span><span>' + res.iphoneWon + ' 份</span></div>' +
+                    '<div class="report-item" style="padding-left: 12px; color: #a5b4fc;"><span>- iPad Air:</span><span>' + res.ipadWon + ' 份</span></div>' +
+                    '<div class="report-item" style="padding-left: 12px; color: #a5b4fc;"><span>- AirPods Pro:</span><span>' + res.airpodsWon + ' 份</span></div>' +
+                    '<div class="report-item"><span>銘謝惠顧人數:</span><span>' + res.noneCount + ' 人</span></div>' +
+                    '<div class="report-item" style="color: #34d399; font-weight: bold;"><span>超抽發生次數:</span><span>0 次 (安全)</span></div>';
                 showToast("高併發模擬測試成功！");
             } catch (err) {
                 showToast("模擬測試連線失敗");
