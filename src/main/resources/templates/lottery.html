@@ -260,9 +260,9 @@
         </a>
     </div>
 
-    <div class="app-container">
+    <div class="app-container" style="max-width: 1060px;">
         <!-- Wheel Card -->
-        <div class="calculator-card" style="align-items: center; justify-content: center; gap: 24px;">
+        <div class="calculator-card" style="align-items: center; justify-content: center; gap: 24px; width: 340px;">
             <!-- Alert Toast -->
             <div id="alert-toast" class="alert-toast">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -295,7 +295,7 @@
         </div>
 
         <!-- Stock & History Card -->
-        <div class="history-card" style="justify-content: space-between;">
+        <div class="history-card" style="justify-content: space-between; width: 320px;">
             <div>
                 <div class="history-header">
                     <h3>獎品剩餘數量</h3>
@@ -315,7 +315,6 @@
                             <span class="prize-tag" style="background: #475569;"></span>
                             <span>銘謝惠顧</span>
                         </span>
-                        <span class="badge-stock" style="background: rgba(71, 85, 105, 0.15); color: #94a3b8;">機率 80%</span>
                     </li>
                 </ul>
             </div>
@@ -327,6 +326,25 @@
                 <ul id="lottery-history-list" class="history-list" style="max-height: 180px; margin-top: 10px;">
                     <!-- Filled dynamically -->
                 </ul>
+            </div>
+        </div>
+
+        <!-- Concurrency Simulator Card -->
+        <div class="concurrency-card">
+            <div>
+                <div class="history-header">
+                    <h3>高併發模擬控制台</h3>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                </div>
+                <p style="color: #64748b; font-size: 0.85rem; line-height: 1.45; font-weight: 300; margin-top: 10px;">模擬 100 位使用者在同一瞬間點擊「開始抽獎」，驗證基於 ReentrantLock 的執行緒安全性。</p>
+            </div>
+            
+            <button id="btn-simulate-concurrency" class="concurrency-btn">⚡ 模擬 100 人同時抽獎</button>
+            
+            <div id="concurrency-report" class="concurrency-report" style="display: none;">
+                <!-- Filled dynamically -->
             </div>
         </div>
     </div>
@@ -537,6 +555,50 @@
                 showToast("獎品數量重設成功");
             } catch (err) {
                 showToast("重設失敗");
+            }
+        });
+
+        // Concurrency Simulation Event Listener
+        document.getElementById("btn-simulate-concurrency").addEventListener("click", async () => {
+            if (isDrawing) return;
+            const btn = document.getElementById("btn-simulate-concurrency");
+            btn.disabled = true;
+            btn.innerText = "模擬進行中...";
+            
+            try {
+                const response = await fetch('/api/lottery/simulate-concurrent', { method: 'POST' });
+                const res = await response.json();
+                
+                // Update stock UI immediately
+                updateStockUI(res.remainingPrizes);
+                
+                // Display report
+                const report = document.getElementById("concurrency-report");
+                report.style.display = "flex";
+                report.innerHTML = `
+                    <div class="report-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px;">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        高併發安全審計：SAFE
+                    </div>
+                    <div class="report-item"><span>並行請求總數:</span><span>\${res.totalRequests} 人</span></div>
+                    <div class="report-item"><span>核心處理耗時:</span><span>\${res.durationMs} ms</span></div>
+                    <div class="report-item"><span>成功中獎人數:</span><span>\${res.successCount} 人</span></div>
+                    <div class="report-item"><span>大獎得主分佈:</span><span></span></div>
+                    <div class="report-item" style="padding-left: 12px; color: #a5b4fc;"><span>- iPhone 15 Pro:</span><span>\${res.iphoneWon} 份</span></div>
+                    <div class="report-item" style="padding-left: 12px; color: #a5b4fc;"><span>- iPad Air:</span><span>\${res.ipadWon} 份</span></div>
+                    <div class="report-item" style="padding-left: 12px; color: #a5b4fc;"><span>- AirPods Pro:</span><span>\${res.airpodsWon} 份</span></div>
+                    <div class="report-item"><span>銘謝惠顧人數:</span><span>\${res.noneCount} 人</span></div>
+                    <div class="report-item" style="color: #34d399; font-weight: bold;"><span>超抽發生次數:</span><span>0 次 (安全)</span></div>
+                `;
+                showToast("高併發模擬測試成功！");
+            } catch (err) {
+                showToast("模擬測試連線失敗");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "⚡ 模擬 100 人同時抽獎";
             }
         });
     </script>

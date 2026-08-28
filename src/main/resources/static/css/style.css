@@ -308,7 +308,7 @@ body {
         align-items: center;
         gap: 20px;
     }
-    .calculator-card, .history-card {
+    .calculator-card, .history-card, .concurrency-card {
         width: 100%;
         max-width: 380px;
     }
@@ -339,4 +339,79 @@ body {
 }
 .nav-link:hover {
     color: #818cf8;
+}
+
+/* Concurrency Card */
+.concurrency-card {
+    background: rgba(30, 41, 59, 0.25);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 24px;
+    width: 320px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+    justify-content: space-between;
+}
+
+.concurrency-btn {
+    background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+    color: white;
+    border: none;
+    outline: none;
+    padding: 14px;
+    border-radius: 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(236, 72, 153, 0.3);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.concurrency-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(236, 72, 153, 0.45);
+    background: linear-gradient(135deg, #f472b6 0%, #db2777 100%);
+}
+
+.concurrency-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.concurrency-report {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.85rem;
+    animation: fadeIn 0.4s ease forwards;
+}
+
+.report-title {
+    font-weight: 700;
+    color: #34d399;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 6px;
+}
+
+.report-item {
+    display: flex;
+    justify-content: space-between;
+    color: #cbd5e1;
 }

@@ -70,6 +70,74 @@ public class LotteryController {
         return new DrawResponse("success", "獎品數量重設成功", null, remainingPrizes);
     }
 
+    @PostMapping("/api/lottery/simulate-concurrent")
+    @ResponseBody
+    public java.util.Map<String, Object> simulateConcurrent() {
+        int numThreads = 100;
+        java.util.concurrent.ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(numThreads);
+        java.util.concurrent.CountDownLatch startLatch = new java.util.concurrent.CountDownLatch(1);
+        java.util.concurrent.CountDownLatch finishLatch = new java.util.concurrent.CountDownLatch(numThreads);
+
+        java.util.List<DrawResult> results = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
+        java.util.concurrent.atomic.AtomicInteger successCount = new java.util.concurrent.atomic.AtomicInteger(0);
+        java.util.concurrent.atomic.AtomicInteger failCount = new java.util.concurrent.atomic.AtomicInteger(0);
+
+        for (int i = 0; i < numThreads; i++) {
+            executor.submit(() -> {
+                try {
+                    startLatch.await(); // Wait for start signal
+                    DrawResult result = lotteryService.draw();
+                    results.add(result);
+                    if (result.isWon()) {
+                        successCount.incrementAndGet();
+                    } else {
+                        failCount.incrementAndGet();
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    finishLatch.countDown();
+                }
+            });
+        }
+
+        long startTime = System.nanoTime();
+        // Fire all threads simultaneously!
+        startLatch.countDown();
+        try {
+            finishLatch.await(); // Wait for all threads to finish
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        long durationMs = (System.nanoTime() - startTime) / 1_000_000;
+        executor.shutdown();
+
+        // Calculate statistics
+        long iphoneWon = results.stream().filter(r -> "prize_a".equals(r.getPrizeId())).count();
+        long ipadWon = results.stream().filter(r -> "prize_b".equals(r.getPrizeId())).count();
+        long airpodsWon = results.stream().filter(r -> "prize_c".equals(r.getPrizeId())).count();
+        long noneCount = results.stream().filter(r -> "none".equals(r.getPrizeId())).count();
+
+        // Verify remaining prizes list to return to frontend
+        java.util.List<PrizeDto> remainingPrizes = new java.util.ArrayList<>();
+        for (Prize p : lotteryService.getPrizes()) {
+            remainingPrizes.add(new PrizeDto(p.getId(), p.getName(), p.getRemainingQuantity(), p.getInitialQuantity()));
+        }
+
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        response.put("totalRequests", numThreads);
+        response.put("successCount", successCount.get());
+        response.put("failCount", failCount.get());
+        response.put("durationMs", durationMs);
+        response.put("iphoneWon", iphoneWon);
+        response.put("ipadWon", ipadWon);
+        response.put("airpodsWon", airpodsWon);
+        response.put("noneCount", noneCount);
+        response.put("remainingPrizes", remainingPrizes);
+
+        return response;
+    }
+
     // Response and DTO Classes
     public static class DrawResponse implements Serializable {
         private static final long serialVersionUID = 1L;
