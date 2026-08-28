@@ -1,0 +1,342 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #f8fafc;
+    overflow-x: hidden;
+    padding: 20px;
+}
+
+.app-container {
+    display: flex;
+    gap: 30px;
+    max-width: 900px;
+    width: 100%;
+    align-items: stretch;
+    justify-content: center;
+}
+
+/* Calculator Card */
+.calculator-card {
+    background: rgba(30, 41, 59, 0.45);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    width: 380px;
+    padding: 28px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Glow decoration */
+.calculator-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Screen styles */
+.screen {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 20px;
+    min-height: 110px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    word-break: break-all;
+    z-index: 1;
+}
+
+.expression-display {
+    font-size: 0.95rem;
+    color: #64748b;
+    min-height: 1.2rem;
+    font-weight: 300;
+    transition: all 0.2s ease;
+}
+
+.value-display {
+    font-size: 2.6rem;
+    font-weight: 700;
+    color: #f8fafc;
+    line-height: 1.2;
+    transition: all 0.2s ease;
+}
+
+/* Grid layout */
+.keypad {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    z-index: 1;
+}
+
+/* Buttons styling */
+.btn {
+    border: none;
+    outline: none;
+    border-radius: 16px;
+    height: 60px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+}
+
+.btn-num {
+    background: rgba(255, 255, 255, 0.05);
+    color: #cbd5e1;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.btn-num:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f8fafc;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn-num:active {
+    transform: translateY(0);
+}
+
+/* Operator Buttons */
+.btn-op {
+    background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+}
+
+.btn-op:hover {
+    background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+}
+
+.btn-op:active {
+    transform: translateY(0);
+}
+
+.btn-op.active {
+    background: #ffffff;
+    color: #4f46e5;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+}
+
+/* Action Buttons (Clear, Undo, Redo) */
+.btn-action {
+    background: rgba(100, 116, 139, 0.15);
+    color: #94a3b8;
+    border: 1px solid rgba(100, 116, 139, 0.1);
+}
+
+.btn-action:hover:not(:disabled) {
+    background: rgba(100, 116, 139, 0.25);
+    color: #f1f5f9;
+    transform: translateY(-2px);
+}
+
+.btn-action:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.btn-clear {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+.btn-clear:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.btn-eq {
+    background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+    color: white;
+    grid-column: span 2;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+}
+
+.btn-eq:hover {
+    background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+/* History Card */
+.history-card {
+    background: rgba(30, 41, 59, 0.25);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 24px;
+    width: 320px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 12px;
+}
+
+.history-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+.history-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    list-style: none;
+    max-height: 380px;
+    padding-right: 4px;
+}
+
+/* Custom Scrollbar for history */
+.history-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.history-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.history-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.history-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.history-item {
+    font-size: 0.95rem;
+    color: #cbd5e1;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+    border-left: 3px solid #6366f1;
+    animation: fadeIn 0.3s ease forwards;
+}
+
+/* Alert Notification */
+.alert-toast {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    background: rgba(239, 68, 68, 0.9);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+    transform: translateY(-150%);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 10;
+}
+
+.alert-toast.show {
+    transform: translateY(0);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .app-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+    .calculator-card, .history-card {
+        width: 100%;
+        max-width: 380px;
+    }
+    .history-list {
+        max-height: 200px;
+    }
+}
+
+/* Navigation Header */
+.nav-header {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 0 10px;
+}
+.nav-link {
+    color: #6366f1;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.05rem;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.nav-link:hover {
+    color: #818cf8;
+}
