@@ -1,4 +1,4 @@
-package com.example.amway;
+package com.example.amway.calculator;
 
 import java.io.Serializable;
 import java.util.ArrayList;

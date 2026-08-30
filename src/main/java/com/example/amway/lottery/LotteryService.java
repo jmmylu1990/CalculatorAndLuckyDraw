@@ -1,4 +1,4 @@
-package com.example.amway;
+package com.example.amway.lottery;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;

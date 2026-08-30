@@ -1,19 +1,19 @@
-package com.example.amway;
+package com.example.amway.calculator;
 
-public class MultiplyCommand implements CalculatorCommand {
+public class SubtractCommand implements CalculatorCommand {
     private final double operand;
     private double prevValue;
     private String description;
 
-    public MultiplyCommand(double operand) {
+    public SubtractCommand(double operand) {
         this.operand = operand;
     }
 
     @Override
     public double execute(double currentValue) {
         this.prevValue = currentValue;
-        double result = currentValue * operand;
-        this.description = String.format("%s * %s = %s", format(currentValue), format(operand), format(result));
+        double result = currentValue - operand;
+        this.description = String.format("%s - %s = %s", format(currentValue), format(operand), format(result));
         return result;
     }
 
@@ -24,7 +24,7 @@ public class MultiplyCommand implements CalculatorCommand {
 
     @Override
     public String getOperator() {
-        return "*";
+        return "-";
     }
 
     @Override

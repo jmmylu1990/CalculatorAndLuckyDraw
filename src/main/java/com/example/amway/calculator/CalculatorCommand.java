@@ -1,4 +1,4 @@
-package com.example.amway;
+package com.example.amway.calculator;
 
 public interface CalculatorCommand {
     double execute(double currentValue);

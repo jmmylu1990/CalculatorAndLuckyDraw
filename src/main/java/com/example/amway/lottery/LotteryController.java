@@ -1,4 +1,4 @@
-package com.example.amway;
+package com.example.amway.lottery;
 
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;

@@ -1,19 +1,22 @@
-package com.example.amway;
+package com.example.amway.calculator;
 
-public class SubtractCommand implements CalculatorCommand {
+public class DivideCommand implements CalculatorCommand {
     private final double operand;
     private double prevValue;
     private String description;
 
-    public SubtractCommand(double operand) {
+    public DivideCommand(double operand) {
         this.operand = operand;
     }
 
     @Override
     public double execute(double currentValue) {
+        if (operand == 0) {
+            throw new ArithmeticException("Division by zero is not allowed");
+        }
         this.prevValue = currentValue;
-        double result = currentValue - operand;
-        this.description = String.format("%s - %s = %s", format(currentValue), format(operand), format(result));
+        double result = currentValue / operand;
+        this.description = String.format("%s / %s = %s", format(currentValue), format(operand), format(result));
         return result;
     }
 
@@ -24,7 +27,7 @@ public class SubtractCommand implements CalculatorCommand {
 
     @Override
     public String getOperator() {
-        return "-";
+        return "/";
     }
 
     @Override

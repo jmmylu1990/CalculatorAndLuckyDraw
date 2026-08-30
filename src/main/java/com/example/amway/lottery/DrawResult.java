@@ -1,4 +1,4 @@
-package com.example.amway;
+package com.example.amway.lottery;
 
 import java.io.Serializable;
 

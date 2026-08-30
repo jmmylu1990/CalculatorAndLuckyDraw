@@ -5,6 +5,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.example.amway.calculator.Calculator;
+import com.example.amway.calculator.AddCommand;
+import com.example.amway.calculator.SubtractCommand;
+import com.example.amway.calculator.MultiplyCommand;
+import com.example.amway.calculator.DivideCommand;
+import com.example.amway.lottery.LotteryService;
+import com.example.amway.lottery.Prize;
+import com.example.amway.lottery.DrawResult;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;

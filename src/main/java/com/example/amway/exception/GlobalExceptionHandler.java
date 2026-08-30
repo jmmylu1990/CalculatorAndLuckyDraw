@@ -1,5 +1,6 @@
-package com.example.amway;
+package com.example.amway.exception;
 
+import com.example.amway.calculator.CalculatorResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
