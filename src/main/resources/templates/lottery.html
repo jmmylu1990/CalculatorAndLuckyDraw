@@ -338,10 +338,10 @@
                         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
                     </svg>
                 </div>
-                <p style="color: #64748b; font-size: 0.85rem; line-height: 1.45; font-weight: 300; margin-top: 10px;">模擬 100 位使用者在同一瞬間點擊「開始抽獎」，驗證基於 ReentrantLock 的執行緒安全性。</p>
+                <p style="color: #64748b; font-size: 0.85rem; line-height: 1.45; font-weight: 300; margin-top: 10px;">模擬 100 位使用者在同一瞬間點擊「開始抽獎」，驗證基於 Redis 的執行緒安全性。</p>
             </div>
             
-            <button id="btn-simulate-concurrency" class="concurrency-btn">⚡ 模擬 100 人同時抽獎</button>
+            <button id="btn-simulate-concurrency" class="concurrency-btn">模擬 100 人同時抽獎</button>
             
             <div id="concurrency-report" class="concurrency-report" style="display: none;">
                 <!-- Filled dynamically -->
@@ -597,7 +597,7 @@
                 showToast("模擬測試連線失敗");
             } finally {
                 btn.disabled = false;
-                btn.innerText = "⚡ 模擬 100 人同時抽獎";
+                btn.innerText = "模擬 100 人同時抽獎";
             }
         });
     </script>
