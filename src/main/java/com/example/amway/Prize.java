@@ -36,6 +36,10 @@ public class Prize implements Serializable {
         return remainingQuantity.get();
     }
 
+    public void setRemainingQuantity(int remainingQuantity) {
+        this.remainingQuantity.set(remainingQuantity);
+    }
+
     public double getProbability() {
         return probability;
     }

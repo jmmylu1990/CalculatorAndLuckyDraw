@@ -19,6 +19,9 @@ class AmwayApplicationTests {
 
     private Calculator calculator;
 
+    @org.springframework.test.context.bean.override.mockito.MockitoBean(answers = org.mockito.Answers.RETURNS_DEEP_STUBS)
+    private org.springframework.data.redis.core.StringRedisTemplate redisTemplate;
+
     @Autowired
     private LotteryService lotteryService;
 

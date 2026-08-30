@@ -1,0 +1,22 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: amway-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - amway-redis-data:/data
+
+  app:
+    build: .
+    container_name: amway-app
+    ports:
+      - "8081:8080"
+    environment:
+      - REDISHOST=redis
+      - REDISPORT=6379
+    depends_on:
+      - redis
+
+volumes:
+  amway-redis-data:
