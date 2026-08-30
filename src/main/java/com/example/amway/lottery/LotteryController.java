@@ -1,5 +1,7 @@
 package com.example.amway.lottery;
 
+import org.springframework.data.redis.core.StringRedisTemplate;
+import java.time.Duration;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,9 +15,11 @@ import java.util.List;
 public class LotteryController {
 
     private final LotteryService lotteryService;
+    private final StringRedisTemplate redisTemplate;
 
-    public LotteryController(LotteryService lotteryService) {
+    public LotteryController(LotteryService lotteryService, StringRedisTemplate redisTemplate) {
         this.lotteryService = lotteryService;
+        this.redisTemplate = redisTemplate;
     }
 
     @GetMapping("/lottery")
@@ -31,12 +35,12 @@ public class LotteryController {
             return new DrawResponse("error", "單次抽獎次數限制為 1 至 10 次", null, null);
         }
 
-        // Prevent double submit within the same user session
-        synchronized (session) {
-            if (Boolean.TRUE.equals(session.getAttribute("drawing_lock"))) {
-                return new DrawResponse("error", "抽獎正在進行中，請勿重複提交", null, null);
-            }
-            session.setAttribute("drawing_lock", true);
+        // Prevent double submit within the same user session using Redis distributed lock
+        String lockKey = "lock:lottery:draw:" + session.getId();
+        Boolean acquired = redisTemplate.opsForValue().setIfAbsent(lockKey, "locked", Duration.ofSeconds(10));
+        
+        if (Boolean.FALSE.equals(acquired)) {
+            return new DrawResponse("error", "抽獎正在進行中，請勿重複提交", null, null);
         }
 
         try {
@@ -51,9 +55,7 @@ public class LotteryController {
             
             return new DrawResponse("success", "", results, remainingPrizes);
         } finally {
-            synchronized (session) {
-                session.removeAttribute("drawing_lock");
-            }
+            redisTemplate.delete(lockKey);
         }
     }
 
